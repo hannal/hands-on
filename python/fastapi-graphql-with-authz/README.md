@@ -5,8 +5,15 @@ FastAPI 밋업, [우리 회사도 FastAPI 써요](https://www.wanted.co.kr/event
 
 ## 실행 방법
 
-- `poetry run localserver` : Local server 구동.
+```shell
+python main.py <command>
+
+python main.py <command> --help
+```
+
+- `localserver` : Local server 구동.
     - port : `8822`
     - demo url : `http://localhost:8822/graphql-app`
-- `poetry run pytest` : pytest 실행.
+- `migrations` : Migration script 자동 생성.
+- `migrate` : Migration 수행.
 
