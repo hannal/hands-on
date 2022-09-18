@@ -9,7 +9,12 @@ from sqlalchemy.ext.asyncio import (
     async_scoped_session,
     create_async_engine,
 )
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship  # noqa
+from sqlalchemy.orm import (
+    declarative_base,
+    sessionmaker,
+    relationship,  # noqa
+    selectinload,  # noqa
+)
 from sqlalchemy.sql.schema import *  # noqa
 from sqlalchemy.sql.sqltypes import *  # noqa
 

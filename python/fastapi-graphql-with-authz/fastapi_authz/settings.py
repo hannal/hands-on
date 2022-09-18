@@ -1,7 +1,8 @@
 import typing as t
+import os
 import dataclasses
 
-from dotenv import load_dotenv, dotenv_values
+from dotenv import dotenv_values
 
 __all__ = [
     "use_settings",
@@ -9,9 +10,12 @@ __all__ = [
     "Settings",
 ]
 
-load_dotenv()
+if _env_name := os.environ.get("ENV_NAME"):
+    env_filename = f".env.{_env_name}"
+else:
+    env_filename = ".env"
 
-_ENVS = dotenv_values()
+_ENVS = dotenv_values(env_filename)
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -42,6 +46,7 @@ _test_settings = Settings(
         "expire_on_commit": False,
         "autoflush": False,
     },
+    db_echo=False,
 )
 
 

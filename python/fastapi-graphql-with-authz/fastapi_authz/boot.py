@@ -1,9 +1,8 @@
-from . import app
+from apps.graphql_app import router as graphql_app_router
 
+from . import app
 from . import db
 from .settings import load_settings
-
-from apps.graphql_app import router as graphql_app_router
 
 __all__ = ["app"]
 
