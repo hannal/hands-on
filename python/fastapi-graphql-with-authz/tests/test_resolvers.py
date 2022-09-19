@@ -3,6 +3,7 @@ from textwrap import dedent
 
 import pytest
 from strawberry.types import Info
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_authz import db
 from apps.graphql_app import models, build_auth_user
@@ -23,7 +24,7 @@ def graphql_info(app_settings, db_session):
 
 @pytest.fixture
 @pytest.mark.asyncio
-async def users(db_session):
+async def users(db_session: AsyncSession):
     objs = [
         models.User(username="user1"),
         models.User(username="user2"),
@@ -33,8 +34,13 @@ async def users(db_session):
     await db_session.commit()
 
     stmt = db.op.select(models.User).options(db.selectinload(models.User.roles))
-    users = await db_session.execute(stmt)
-    yield users.scalars().all()
+    result = await db_session.execute(stmt)
+    users = result.scalars().all()
+    yield users
+
+    for _o in users:
+        await db_session.delete(_o)
+    await db_session.commit()
 
 
 @pytest.fixture
@@ -43,20 +49,27 @@ async def user_roles(db_session, users):
     objs = [
         models.UserRole(name="role1"),
         models.UserRole(name="role2"),
+        models.UserRole(name="role3"),
     ]
     db_session.add_all(objs)
 
     await db_session.commit()
 
     stmt = db.op.select(models.UserRole)
-    roles = await db_session.execute(stmt)
-    yield roles.scalars().all()
+    result = await db_session.execute(stmt)
+    roles = result.scalars().all()
+
+    yield roles
+
+    for _o in roles:
+        await db_session.delete(_o)
+    await db_session.commit()
 
 
 @pytest.mark.asyncio
 async def test_query_users(db_session, graphql_info, users, user_roles):
     user = users[0]
-    user.roles.append(user_roles[0])
+    user.roles.extend(user_roles)
     db_session.add(user)
     await db_session.commit()
 
@@ -87,3 +100,46 @@ async def test_query_users(db_session, graphql_info, users, user_roles):
 
     assert result_users == expected_users
     assert result_roles == expected_roles
+
+
+@pytest.mark.parametrize(
+    "role_indexes, expected_authz_errors",
+    [
+        [[], True],
+        [[0], True],
+        [[1], True],
+        [[0, 1], False],
+    ],
+)
+@pytest.mark.asyncio
+async def test_authorization_by_role(
+    db_session,
+    graphql_info,
+    users,
+    user_roles,
+    role_indexes: list[int],
+    expected_authz_errors,
+):
+    user = users[0]
+    for _index in role_indexes:
+        user.roles.append(user_roles[_index])
+    db_session.add(user)
+    await db_session.commit()
+
+    graphql_info.context["user"] = build_auth_user(user)
+
+    query = dedent(
+        """
+        query MyQuery {
+            users {
+                id
+                roles {
+                    id
+                    name
+                }
+            }
+        }
+        """
+    )
+    result = await schema.execute(query, context_value=graphql_info.context)
+    assert (result.errors is not None) is expected_authz_errors

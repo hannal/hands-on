@@ -1,12 +1,11 @@
 import typing as t
 
 from strawberry.permission import BasePermission
-from starlette.requests import Request
-from starlette.websockets import WebSocket
 from strawberry.types import Info
 from strawberry.types.nodes import Selection
 from graphql.pyutils.path import Path
 
+from apps.graphql_app.mock_authz import check_authorization
 from fastapi_authz.auth import BaseUser
 
 
@@ -19,7 +18,7 @@ def build_schema_keys(path: Path, keys: list):
     return f"/{key_path}", path.typename
 
 
-def build_role_payload(
+def build_authz_payload(
     user: BaseUser,
     path: Path,
     selected_fields: list[Selection],
@@ -27,8 +26,9 @@ def build_role_payload(
     paths, schema_type = build_schema_keys(path, [])
     return {
         "user_roles": user.roles,
-        "paths": paths,
-        "type": schema_type,
+        "resources": paths,
+        "action": schema_type,
+        "fields": selected_fields,
     }
 
 
@@ -45,5 +45,5 @@ class HasRoles(BasePermission):
 
     async def has_permission(self, source: t.Any, info: Info, **kwargs) -> bool:
         user: BaseUser = info.context["user"]
-        keys = build_role_payload(user, info.path, info.selected_fields)
-        return user.is_authenticated
+        authz_payload = build_authz_payload(user, info.path, info.selected_fields)
+        return check_authorization(**authz_payload)
