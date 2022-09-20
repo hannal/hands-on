@@ -1,12 +1,18 @@
 from apps.graphql_app import router as graphql_app_router
+from starlette.middleware.authentication import AuthenticationMiddleware
 
 from . import app
 from . import db
+from .auth import TokenAuthenticationBackend
 from .settings import load_settings
 
 __all__ = ["app"]
 
 app.include_router(graphql_app_router, prefix="/graphql-app")
+app.add_middleware(
+    AuthenticationMiddleware,
+    backend=TokenAuthenticationBackend(),
+)
 
 
 @app.on_event("startup")

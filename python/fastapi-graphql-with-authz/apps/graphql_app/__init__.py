@@ -31,8 +31,11 @@ async def get_user(token: str, db_session: AsyncSession):
 async def get_router_context(
     db_session=Depends(use_db_session),
     app_settings=Depends(use_settings),
+    token=Depends(oauth2_bearer_scheme),
 ):
+    user = await get_user(token, db_session)
     return {
+        "user": user,
         "db_session": db_session,
         "app_settings": app_settings,
     }
