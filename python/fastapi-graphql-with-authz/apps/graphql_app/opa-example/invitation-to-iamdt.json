@@ -1,0 +1,8 @@
+{
+  "role1": {
+      "Query": ["/users"]
+  },
+  "role2": {
+      "Query": ["/roles", "/users/roles"]
+  }
+}
