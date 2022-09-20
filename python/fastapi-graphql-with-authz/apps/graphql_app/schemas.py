@@ -10,9 +10,6 @@ from . import permissions
 
 async def get_user_roles(root: "User", info: Info) -> list["UserRole"]:
     db_session = info.context["db_session"]
-    # print("1" * 80)
-    # print(info.path)
-    # print(info.selected_fields)
 
     stmt = (
         db.select(models.User)
@@ -26,9 +23,6 @@ async def get_user_roles(root: "User", info: Info) -> list["UserRole"]:
 
 async def get_users(info: Info) -> list["User"]:
     db_session = info.context["db_session"]
-    # print("2" * 80)
-    # print(info.path)
-    # print(info.selected_fields)
 
     stmt = db.select(models.User).options(db.selectinload(models.User.roles))
     result = await db_session.execute(stmt)
