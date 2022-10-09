@@ -1,5 +1,13 @@
-from apps.reservation.repositories import ReservationRepository
+from fastapi import APIRouter
+
+from . import services
+from .repositories import ReservationRepository, Reservation
 
 
-def reservations(user, repository: ReservationRepository):
-    return repository.findall()
+router = APIRouter()
+
+
+@router.get("/reservation/reservations", response_model=list[Reservation])
+def reservations():
+    repository = ReservationRepository()
+    return services.reservations(None, repository)
