@@ -20,7 +20,10 @@ def reservations_fixture():
 
 
 def test_get_reservation_list(client, reservations_fixture):
-    res = client.get("/reservation/reservations")
+    res = client.get(
+        "/reservation/reservations",
+        params={"scheduled_date": datetime.date.today()},
+    )
 
     assert res.status_code == status.HTTP_200_OK
     data = res.json()
@@ -28,3 +31,14 @@ def test_get_reservation_list(client, reservations_fixture):
     result = frozenset([_o["id"] for _o in data])
     expected = frozenset([_o.id for _o in reservations_fixture])
     assert result & expected == expected
+
+
+def test_cannot_get_reservation_list_with_invalid_scheduled_date(
+    client, reservations_fixture
+):
+    res = client.get(
+        "/reservation/reservations",
+        params={"scheduled_date": datetime.date(2020, 1, 1)},
+    )
+
+    assert res.status_code == status.HTTP_400_BAD_REQUEST
