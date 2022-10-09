@@ -1,4 +1,6 @@
-import dataclasses
+import datetime
+
+import pydantic
 
 # ReservationRepository객체
 #     def create(예약_항목_생성에_필요한_데이터):
@@ -13,9 +15,13 @@ import dataclasses
 items = []
 
 
-@dataclasses.dataclass
-class ReservationCreatePayload:
-    id: int | None = dataclasses.field(default=None)
+class ReservationCreatePayload(pydantic.BaseModel):
+    scheduled_date: datetime.datetime
+
+
+class Reservation(pydantic.BaseModel):
+    id: int
+    scheduled_date: datetime.datetime
 
     def __hash__(self):
         return hash(id)
@@ -27,9 +33,11 @@ class ReservationRepository:
     def __init__(self):
         self._items = items
 
-    def create(self, payload):
-        obj = payload
-        obj.id = len(self._items) + 1
+    def create(self, payload: ReservationCreatePayload) -> Reservation:
+        obj = Reservation(
+            id=len(self._items) + 1,
+            **payload.dict(),
+        )
         self._items.append(obj)
         return obj
 

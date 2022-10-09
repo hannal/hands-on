@@ -1,3 +1,5 @@
+import datetime
+
 from apps.reservation.repositories import (
     ReservationRepository,
     ReservationCreatePayload,
@@ -7,7 +9,7 @@ from apps.reservation.repositories import (
 def test_repository_can_create_reservation_with_valid_payload():
     # 주어진 조건
     #   - 유효한 예약 항목 생성 데이터
-    payload = ReservationCreatePayload()
+    payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
 
     # 수행
     #   - 예약 항목 생성
@@ -24,7 +26,8 @@ def test_repository_find_all_items_without_params():
     # 주어진 조건
     #   - 예약 항목 2개
     repository = ReservationRepository()
-    item = repository.create(ReservationCreatePayload())
+    payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
+    item = repository.create(payload)
 
     # 수행
     #   - 예약 항목 목록을 가져오기

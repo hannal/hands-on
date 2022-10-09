@@ -1,3 +1,5 @@
+import datetime
+
 from apps.reservation.services import reservations
 from apps.reservation.repositories import (
     ReservationRepository,
@@ -11,10 +13,11 @@ def test_reservations():
     #   - 예약 항목 2개
     user = "로그인 한 고객"
     repository = ReservationRepository()
-    items = [
-        repository.create(ReservationCreatePayload()),
-        repository.create(ReservationCreatePayload()),
+    payloads = [
+        ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
+        ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
     ]
+    items = [repository.create(_payload) for _payload in payloads]
 
     # - 수행 (When)
     #   - 예약 가능한 세션 목록을 가져오기
