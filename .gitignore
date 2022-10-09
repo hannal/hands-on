@@ -1324,4 +1324,6 @@ hs_err_pid*
 
 !/gradle/wrapper/gradle-wrapper.jar
 
+.envrc
+
 # End of https://www.toptal.com/developers/gitignore/api/python,jetbrains,jetbrains+iml,jetbrains+all,pycharm,pycharm+all,pycharm+iml,visualstudiocode,node,rust,git,venv,dotenv,react,reactnative,android,androidstudio,go,goland,goland+all,goland+iml
