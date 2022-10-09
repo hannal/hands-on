@@ -3,16 +3,14 @@ import datetime
 import pytest
 from fastapi import status
 
-from apps.reservation.repositories import (
-    ReservationRepository,
-    ReservationCreatePayload,
-)
+from apps.reservation.repositories import ReservationDbRepository
+from apps.reservation.schemas import ReservationCreatePayload
 
 
 @pytest.mark.asyncio
 @pytest.fixture(scope="session")
-async def reservations_fixture():
-    repository = ReservationRepository()
+async def reservations_fixture(db_session):
+    repository = ReservationDbRepository(db_session)
     payloads = [
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
