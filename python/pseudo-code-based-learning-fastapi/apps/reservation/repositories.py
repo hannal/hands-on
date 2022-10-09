@@ -1,7 +1,10 @@
 import typing as t
+import abc
 import datetime
 
-import pydantic
+from db import AsyncSession, select, Select, func, extract
+from apps.reservation.schemas import ReservationCreatePayload, Reservation
+from apps.reservation.models import Reservation as ReservationModel
 
 # ReservationRepository객체
 #     def create(예약_항목_생성에_필요한_데이터):
@@ -16,23 +19,23 @@ import pydantic
 items = []
 
 
-class ReservationCreatePayload(pydantic.BaseModel):
-    scheduled_date: datetime.datetime
+class BaseReservationRepository(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    async def create(self, payload: ReservationCreatePayload) -> Reservation:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def findall(
+        self, *, scheduled_date: t.Optional[datetime.date] = None
+    ) -> list[Reservation]:
+        raise NotImplementedError
 
 
-class Reservation(pydantic.BaseModel):
-    id: int
-    scheduled_date: datetime.datetime
-    is_available: bool
-
-    def __hash__(self):
-        return hash(id)
-
-
-class ReservationRepository:
+class ReservationFakeRepository(BaseReservationRepository):
     _items: list[Reservation]
 
     def __init__(self):
+        super().__init__()
         self._items = items
 
     async def create(self, payload: ReservationCreatePayload) -> Reservation:
@@ -73,3 +76,44 @@ class ReservationRepository:
                 filtered,
             )
         return filtered
+
+
+class ReservationDbRepository(BaseReservationRepository):
+    _db_session: AsyncSession
+
+    def __init__(self, db_session: AsyncSession):
+        super().__init__()
+        self._db_session = db_session
+
+    async def create(self, payload: ReservationCreatePayload) -> Reservation:
+        obj = ReservationModel(
+            is_available=True,
+            **payload.dict(),
+        )
+        self._db_session.add(obj)
+        await self._db_session.commit()
+        return Reservation.from_orm(obj)
+
+    async def findall(
+        self, *, scheduled_date: t.Optional[datetime.date] = None
+    ) -> list[Reservation]:
+        stmt = select(ReservationModel)
+        if isinstance(scheduled_date, datetime.date):
+            stmt = self._filter_by_scheduled_date(scheduled_date, stmt)
+
+        result = await self._db_session.execute(stmt)
+        return [Reservation.from_orm(_o) for _o in result.scalars().all()]
+
+    @staticmethod
+    def _filter_by_scheduled_date(
+        scheduled_date: datetime.date, stmt: Select
+    ) -> filter:
+        stmt = stmt.where(
+            extract("year", ReservationModel.scheduled_date) == scheduled_date.year,
+            extract("month", ReservationModel.scheduled_date) == scheduled_date.month,
+        )
+
+        today = datetime.datetime.utcnow().date()
+        if scheduled_date == today:
+            stmt = stmt.where(func.date(ReservationModel.scheduled_date) >= today)
+        return stmt

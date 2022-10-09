@@ -4,20 +4,39 @@ from unittest.mock import MagicMock
 import pytest
 
 from apps.reservation.repositories import (
-    ReservationRepository,
-    ReservationCreatePayload,
+    ReservationFakeRepository,
+    ReservationDbRepository,
+)
+from apps.reservation.schemas import ReservationCreatePayload
+
+
+repository_parametrize = pytest.mark.parametrize(
+    "repository_key",
+    ["fake", "db"],
 )
 
 
+@pytest.fixture
+def repositories(db_session):
+    yield {
+        "fake": ReservationFakeRepository(),
+        "db": ReservationDbRepository(db_session=db_session),
+    }
+
+
+@repository_parametrize
 @pytest.mark.asyncio
-async def test_repository_can_create_reservation_with_valid_payload():
+async def test_repository_can_create_reservation_with_valid_payload(
+    repositories, repository_key
+):
+    repository = repositories[repository_key]
+
     # 주어진 조건
     #   - 유효한 예약 항목 생성 데이터
     payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
 
     # 수행
     #   - 예약 항목 생성
-    repository = ReservationRepository()
     result = await repository.create(payload)
 
     # 기대하는 결과
@@ -26,11 +45,13 @@ async def test_repository_can_create_reservation_with_valid_payload():
     assert isinstance(result.id, int)
 
 
+@repository_parametrize
 @pytest.mark.asyncio
-async def test_repository_find_all_items_without_params():
+async def test_repository_find_all_items_without_params(repositories, repository_key):
+    repository = repositories[repository_key]
+
     # 주어진 조건
     #   - 예약 항목 2개
-    repository = ReservationRepository()
     payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
     item = await repository.create(payload)
 
@@ -45,9 +66,10 @@ async def test_repository_find_all_items_without_params():
     assert any([_o.id == item.id for _o in result])
 
 
+@repository_parametrize
 @pytest.mark.asyncio
-async def test_repository_find_all_available_items():
-    repository = ReservationRepository()
+async def test_repository_find_all_available_items(repositories, repository_key):
+    repository = repositories[repository_key]
 
     # 주어진 조건
     #   - 예약된 항목 1개
@@ -68,9 +90,12 @@ async def test_repository_find_all_available_items():
     assert all([_o.is_available for _o in result]) is True
 
 
+@repository_parametrize
 @pytest.mark.asyncio
-async def test_repository_find_all_items_by_scheduled_date(monkeypatch):
-    repository = ReservationRepository()
+async def test_repository_find_all_items_by_scheduled_date(
+    monkeypatch, repositories, repository_key
+):
+    repository = repositories[repository_key]
 
     # 주어진 조건
     #   - 예약 항목 6개
