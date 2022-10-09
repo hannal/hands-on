@@ -46,3 +46,36 @@ def test_reservations_cannot_get_list_with_invalid_scheduled_date():
         # - 수행 (When)
         #   - 지난 달을 지정하여 예약 가능한 세션 목록을 가져오기
         reservations(user, repository, scheduled_date)
+
+
+def test_reservations_can_get_list_with_valid_scheduled_date():
+    repository = ReservationRepository()
+
+    # - 주어진 조건 (Given)
+    #   - 로그인 한 고객
+    #   - 예약 항목 3개
+    user = "로그인 한 고객"
+    target_date = datetime.datetime.utcnow() + datetime.timedelta(days=61)
+    payloads = [
+        ReservationCreatePayload(scheduled_date=target_date),
+        ReservationCreatePayload(scheduled_date=target_date),
+        # 기준 달 이후
+        ReservationCreatePayload(
+            scheduled_date=target_date + datetime.timedelta(days=31)
+        ),
+        # 기준 달 이전
+        ReservationCreatePayload(
+            scheduled_date=target_date - datetime.timedelta(days=31)
+        ),
+    ]
+    items = [repository.create(_o) for _o in payloads]
+    items[0].is_available = False
+
+    # - 수행 (When)
+    #   - 지난 달을 지정하여 예약 가능한 세션 목록을 가져오기
+    result = reservations(user, repository, target_date)
+
+    # - 기대하는 결과 (Then)
+    #   - 지정한 달의 예약 가능 항목만 목록으로 반환
+    expected = repository.findall(scheduled_date=target_date)
+    assert frozenset(result) == frozenset(expected)

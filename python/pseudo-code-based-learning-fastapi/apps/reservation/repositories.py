@@ -1,3 +1,4 @@
+import typing as t
 import datetime
 
 import pydantic
@@ -8,8 +9,8 @@ import pydantic
 #         새_예약_항목.id = 고유한_일련번호_값
 #     return 새_예약_항목
 #
-#     def findall():
-#         return list(저장된_영속 데이터들)
+#     def findall(지정한_일자):
+#         return list(저장된_영속 데이터들 중에서 지정한일자에 속한 달)
 
 
 items = []
@@ -43,5 +44,17 @@ class ReservationRepository:
         self._items.append(obj)
         return obj
 
-    def findall(self):
-        return [_o for _o in self._items if _o.is_available]
+    def findall(
+        self, *, scheduled_date: t.Optional[datetime.date] = None
+    ) -> list[Reservation]:
+        filtered = filter(lambda _o: _o.is_available, self._items)
+        if isinstance(scheduled_date, datetime.date):
+            filtered = filter(
+                lambda _o: _o.scheduled_date.year == scheduled_date.year,
+                filtered,
+            )
+            filtered = filter(
+                lambda _o: _o.scheduled_date.month == scheduled_date.month,
+                filtered,
+            )
+        return list(filtered)

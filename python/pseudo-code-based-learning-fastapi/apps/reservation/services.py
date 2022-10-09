@@ -6,8 +6,8 @@ from apps.reservation.repositories import ReservationRepository
 def reservations(
     user, repository: ReservationRepository, scheduled_date: datetime.date
 ):
-    validate_scheduled_date(scheduled_date)
-    return repository.findall()
+    scheduled_date = validate_scheduled_date(scheduled_date)
+    return repository.findall(scheduled_date=scheduled_date)
 
 
 def validate_scheduled_date(v: datetime.date):

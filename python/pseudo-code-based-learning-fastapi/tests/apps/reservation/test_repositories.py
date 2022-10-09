@@ -57,6 +57,43 @@ def test_repository_find_all_available_items():
     result = repository.findall()
 
     # 기대하는 결과
-    #   - 저장된 예약 항목 전체를 목록으로 반환
+    #   - 저장된 예약 가능 항목을 목록으로 반환
     assert any([not _o.is_available for _o in result]) is False
     assert all([_o.is_available for _o in result]) is True
+
+
+def test_repository_find_all_items_by_scheduled_date():
+    repository = ReservationRepository()
+
+    # 주어진 조건
+    #   - 예약 항목 3개
+    target_date = datetime.datetime.utcnow() + datetime.timedelta(days=31)
+    payloads = [
+        ReservationCreatePayload(scheduled_date=target_date),
+        ReservationCreatePayload(scheduled_date=target_date),
+        # 기준 달 이후
+        ReservationCreatePayload(
+            scheduled_date=target_date + datetime.timedelta(days=31)
+        ),
+        # 기준 달 이전
+        ReservationCreatePayload(
+            scheduled_date=target_date - datetime.timedelta(days=31)
+        ),
+    ]
+    items = [repository.create(_o) for _o in payloads]
+    items[0].is_available = False
+
+    # 수행
+    #   - 지정한 달의 예약 항목 목록을 가져오기
+    result = repository.findall(scheduled_date=target_date)
+
+    # 기대하는 결과
+    #   - 지정한 달의 예약 가능 항목만 목록으로 반환
+    assert all(
+        [
+            _o.is_available
+            and _o.scheduled_date.year == target_date.year
+            and _o.scheduled_date.month == target_date.month
+            for _o in result
+        ]
+    )
