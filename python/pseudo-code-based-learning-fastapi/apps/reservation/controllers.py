@@ -11,7 +11,7 @@ router = APIRouter(prefix="/reservation")
 
 
 @router.get("/reservations", response_model=list[Reservation])
-def reservations(scheduled_date: datetime.date):
+async def reservations(scheduled_date: datetime.date):
     repository = ReservationRepository()
     try:
         return services.reservations(None, repository, scheduled_date)
