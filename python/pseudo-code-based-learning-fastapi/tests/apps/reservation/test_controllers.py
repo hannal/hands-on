@@ -9,14 +9,15 @@ from apps.reservation.repositories import (
 )
 
 
+@pytest.mark.asyncio
 @pytest.fixture(scope="session")
-def reservations_fixture():
+async def reservations_fixture():
     repository = ReservationRepository()
     payloads = [
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
     ]
-    return [repository.create(_payload) for _payload in payloads]
+    yield [await repository.create(_payload) for _payload in payloads]
 
 
 def test_get_reservation_list(client, reservations_fixture):

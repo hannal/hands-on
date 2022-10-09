@@ -35,7 +35,7 @@ class ReservationRepository:
     def __init__(self):
         self._items = items
 
-    def create(self, payload: ReservationCreatePayload) -> Reservation:
+    async def create(self, payload: ReservationCreatePayload) -> Reservation:
         obj = Reservation(
             id=len(self._items) + 1,
             is_available=True,
@@ -44,7 +44,7 @@ class ReservationRepository:
         self._items.append(obj)
         return obj
 
-    def findall(
+    async def findall(
         self, *, scheduled_date: t.Optional[datetime.date] = None
     ) -> list[Reservation]:
         filtered = filter(lambda _o: _o.is_available, self._items)

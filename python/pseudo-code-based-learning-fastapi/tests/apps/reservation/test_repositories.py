@@ -1,13 +1,16 @@
 import datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from apps.reservation.repositories import (
     ReservationRepository,
     ReservationCreatePayload,
 )
 
 
-def test_repository_can_create_reservation_with_valid_payload():
+@pytest.mark.asyncio
+async def test_repository_can_create_reservation_with_valid_payload():
     # 주어진 조건
     #   - 유효한 예약 항목 생성 데이터
     payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
@@ -15,7 +18,7 @@ def test_repository_can_create_reservation_with_valid_payload():
     # 수행
     #   - 예약 항목 생성
     repository = ReservationRepository()
-    result = repository.create(payload)
+    result = await repository.create(payload)
 
     # 기대하는 결과
     #   - 고유한 일련번호 값이 `id` 속성으로 부여된 새로운 객체 반환
@@ -23,16 +26,17 @@ def test_repository_can_create_reservation_with_valid_payload():
     assert isinstance(result.id, int)
 
 
-def test_repository_find_all_items_without_params():
+@pytest.mark.asyncio
+async def test_repository_find_all_items_without_params():
     # 주어진 조건
     #   - 예약 항목 2개
     repository = ReservationRepository()
     payload = ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
-    item = repository.create(payload)
+    item = await repository.create(payload)
 
     # 수행
     #   - 예약 항목 목록을 가져오기
-    result = repository.findall()
+    result = await repository.findall()
 
     # 기대하는 결과
     #   - 저장된 예약 항목 전체를 목록으로 반환
@@ -41,21 +45,22 @@ def test_repository_find_all_items_without_params():
     assert any([_o.id == item.id for _o in result])
 
 
-def test_repository_find_all_available_items():
+@pytest.mark.asyncio
+async def test_repository_find_all_available_items():
     repository = ReservationRepository()
 
     # 주어진 조건
     #   - 예약된 항목 1개
     #   - 예약 가능한 항목 1개
     for _is_available in [True, False]:
-        _o = repository.create(
+        _o = await repository.create(
             ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow())
         )
         _o.is_available = _is_available
 
     # 수행
     #   - 예약 항목 목록을 가져오기
-    result = repository.findall()
+    result = await repository.findall()
 
     # 기대하는 결과
     #   - 저장된 예약 가능 항목을 목록으로 반환
@@ -63,7 +68,8 @@ def test_repository_find_all_available_items():
     assert all([_o.is_available for _o in result]) is True
 
 
-def test_repository_find_all_items_by_scheduled_date(monkeypatch):
+@pytest.mark.asyncio
+async def test_repository_find_all_items_by_scheduled_date(monkeypatch):
     repository = ReservationRepository()
 
     # 주어진 조건
@@ -90,7 +96,7 @@ def test_repository_find_all_items_by_scheduled_date(monkeypatch):
         ),
     ]
     unavailable_item, yesterday_item, *items = [
-        repository.create(_o) for _o in payloads
+        await repository.create(_o) for _o in payloads
     ]
     unavailable_item.is_available = False
 
@@ -101,7 +107,7 @@ def test_repository_find_all_items_by_scheduled_date(monkeypatch):
         _mock_datetime.utcnow.return_value = target_date
         _m.setattr(datetime, "datetime", _mock_datetime)
 
-        result = frozenset(repository.findall(scheduled_date=target_date.date()))
+        result = frozenset(await repository.findall(scheduled_date=target_date.date()))
 
     # 기대하는 결과
     #   - 지정한 달의 예약 가능 항목만 목록으로 반환

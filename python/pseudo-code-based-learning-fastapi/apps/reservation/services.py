@@ -7,7 +7,7 @@ async def reservations(
     user, repository: ReservationRepository, scheduled_date: datetime.date
 ):
     scheduled_date = validate_scheduled_date(scheduled_date)
-    return repository.findall(scheduled_date=scheduled_date)
+    return await repository.findall(scheduled_date=scheduled_date)
 
 
 def validate_scheduled_date(v: datetime.date):

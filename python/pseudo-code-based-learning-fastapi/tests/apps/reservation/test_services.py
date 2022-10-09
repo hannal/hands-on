@@ -20,7 +20,7 @@ async def test_reservations():
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
     ]
-    items = [repository.create(_payload) for _payload in payloads]
+    items = [await repository.create(_payload) for _payload in payloads]
 
     # - 수행 (When)
     #   - 예약 가능한 세션 목록을 가져오기
@@ -71,7 +71,7 @@ async def test_reservations_can_get_list_with_valid_scheduled_date():
             scheduled_date=target_date - datetime.timedelta(days=31)
         ),
     ]
-    items = [repository.create(_o) for _o in payloads]
+    items = [await repository.create(_o) for _o in payloads]
     items[0].is_available = False
 
     # - 수행 (When)
@@ -80,5 +80,5 @@ async def test_reservations_can_get_list_with_valid_scheduled_date():
 
     # - 기대하는 결과 (Then)
     #   - 지정한 달의 예약 가능 항목만 목록으로 반환
-    expected = repository.findall(scheduled_date=target_date)
+    expected = await repository.findall(scheduled_date=target_date)
     assert frozenset(result) == frozenset(expected)
