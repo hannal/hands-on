@@ -1,27 +1,32 @@
-from apps.reservation.controllers import reservations
+import datetime
+
+import pytest
+from fastapi import status
+from fastapi.testclient import TestClient
+
+from main import app
 from apps.reservation.repositories import (
     ReservationRepository,
     ReservationCreatePayload,
 )
 
 
-def test_reservations():
-    # - 주어진 조건 (Given)
-    #   - 로그인 한 고객
-    #   - 예약 항목 2개
-    user = "로그인 한 고객"
+@pytest.fixture(scope="session")
+def reservations_fixture():
     repository = ReservationRepository()
-    items = [
-        repository.create(ReservationCreatePayload()),
-        repository.create(ReservationCreatePayload()),
+    payloads = [
+        ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
+        ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
     ]
+    return [repository.create(_payload) for _payload in payloads]
 
-    # - 수행 (When)
-    #   - 예약 가능한 세션 목록을 가져오기
-    result = reservations(user, repository)
 
-    # - 기대하는 결과 (Then)
-    #   - 예약 항목 2개를 목록으로 반환
-    result_set = frozenset(result)
-    expected_set = frozenset(items)
-    assert result_set & expected_set == expected_set
+def test_get_reservation_list(reservations_fixture):
+    client = TestClient(app)
+    res = client.get("/reservation/reservations")
+    assert res.status_code == status.HTTP_200_OK
+    data = res.json()
+
+    result = frozenset([_o["id"] for _o in data])
+    expected = frozenset([_o.id for _o in reservations_fixture])
+    assert result & expected == expected
