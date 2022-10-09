@@ -22,13 +22,14 @@ class ReservationCreatePayload(pydantic.BaseModel):
 class Reservation(pydantic.BaseModel):
     id: int
     scheduled_date: datetime.datetime
+    is_available: bool
 
     def __hash__(self):
         return hash(id)
 
 
 class ReservationRepository:
-    _items: list
+    _items: list[Reservation]
 
     def __init__(self):
         self._items = items
@@ -36,10 +37,11 @@ class ReservationRepository:
     def create(self, payload: ReservationCreatePayload) -> Reservation:
         obj = Reservation(
             id=len(self._items) + 1,
+            is_available=True,
             **payload.dict(),
         )
         self._items.append(obj)
         return obj
 
     def findall(self):
-        return self._items
+        return [_o for _o in self._items if _o.is_available]
