@@ -1,12 +1,10 @@
-import datetime
-
-from fastapi import APIRouter, status, Depends
-from fastapi.exceptions import HTTPException
+from fastapi import APIRouter, Depends
 
 from db import use_db_session
 from libs.fastapi import dependencies
+from libs.fastapi.dependencies import User
 from .repositories import BaseReservationRepository, ReservationDbRepository
-from .schemas import Reservation
+from .schemas import Reservation, ReservationListParam
 from . import services
 
 router = APIRouter(prefix="/reservation")
@@ -16,16 +14,10 @@ async def use_reservation_repository(db_session=Depends(use_db_session)):
     yield ReservationDbRepository(db_session=db_session)
 
 
-@router.get(
-    "/reservations",
-    response_model=list[Reservation],
-    dependencies=[Depends(dependencies.use_user)],
-)
+@router.get("/reservations", response_model=list[Reservation])
 async def reservations(
-    scheduled_date: datetime.date,
+    user: User = Depends(dependencies.use_user),
+    params: ReservationListParam = Depends(),
     repository: BaseReservationRepository = Depends(use_reservation_repository),
 ):
-    try:
-        return await services.reservations(None, repository, scheduled_date)
-    except ValueError:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    return await services.reservations(user, repository, params.scheduled_date)
