@@ -14,6 +14,6 @@ router = APIRouter(prefix="/reservation")
 async def reservations(scheduled_date: datetime.date):
     repository = ReservationRepository()
     try:
-        return services.reservations(None, repository, scheduled_date)
+        return await services.reservations(None, repository, scheduled_date)
     except ValueError:
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
