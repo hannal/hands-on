@@ -14,4 +14,11 @@ def fastapi_app():
 
 @pytest.fixture
 def client(fastapi_app):
+    client = TestClient(fastapi_app)
+    client.headers.update({"Authorization": "Bearer hannal"})
+    yield client
+
+
+@pytest.fixture
+def anonymous_client(fastapi_app):
     yield TestClient(fastapi_app)
