@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from db import use_db_session, get_session_factory
+from libs.fastapi.error_handlers import setup_error_handlers
 from apps.reservation.controllers import router
 
 
@@ -15,6 +16,7 @@ def fastapi_app(db_engine):
 
     app = FastAPI()
     app.dependency_overrides[use_db_session] = testing_use_db_session
+    setup_error_handlers(app)
     app.include_router(router)
     yield app
 
