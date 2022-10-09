@@ -2,9 +2,7 @@ import datetime
 
 import pytest
 from fastapi import status
-from fastapi.testclient import TestClient
 
-from main import app
 from apps.reservation.repositories import (
     ReservationRepository,
     ReservationCreatePayload,
@@ -21,9 +19,9 @@ def reservations_fixture():
     return [repository.create(_payload) for _payload in payloads]
 
 
-def test_get_reservation_list(reservations_fixture):
-    client = TestClient(app)
+def test_get_reservation_list(client, reservations_fixture):
     res = client.get("/reservation/reservations")
+
     assert res.status_code == status.HTTP_200_OK
     data = res.json()
 
