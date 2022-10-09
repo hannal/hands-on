@@ -25,7 +25,7 @@ BaseModel = declarative_base()  # noqa
 
 BASE_DIR = Path(__file__).parent
 
-DB_DSN = f"sqlite+aiosqlite://{(BASE_DIR / 'db.sqlite3').as_posix()}"
+DB_DSN = f"sqlite+aiosqlite:///{(BASE_DIR / 'db.sqlite3').as_posix()}"
 
 DB_SESSION_OPTIONS = {
     "autocommit": False,
