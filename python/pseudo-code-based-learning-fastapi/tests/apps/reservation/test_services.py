@@ -1,5 +1,7 @@
 import datetime
 
+import pytest
+
 from apps.reservation.services import reservations
 from apps.reservation.repositories import (
     ReservationRepository,
@@ -28,3 +30,18 @@ def test_reservations():
     result_set = frozenset(result)
     expected_set = frozenset(items)
     assert result_set & expected_set == expected_set
+
+
+def test_reservations_cannot_get_list_with_invalid_scheduled_date():
+    # - 주어진 조건 (Given)
+    #   - 로그인 한 고객
+    user = "로그인 한 고객"
+    repository = ReservationRepository()
+    scheduled_date = datetime.date(2020, 1, 1)
+
+    # - 기대하는 결과 (Then)
+    #   - 잘못된 요청하지 말라는 오류 응답
+    with pytest.raises(ValueError):
+        # - 수행 (When)
+        #   - 지난 달을 지정하여 예약 가능한 세션 목록을 가져오기
+        reservations(user, repository, scheduled_date)
