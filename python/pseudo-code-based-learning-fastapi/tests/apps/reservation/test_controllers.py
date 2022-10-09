@@ -18,7 +18,7 @@ def test_reservations():
 
     # - 수행 (When)
     #   - 예약 가능한 세션 목록을 가져오기
-    result = reservations(user)
+    result = reservations(user, repository)
 
     # - 기대하는 결과 (Then)
     #   - 예약 항목 2개를 목록으로 반환
