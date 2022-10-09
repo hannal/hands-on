@@ -1,17 +1,13 @@
-import dataclasses
-
-from apps.reservation.repositories import ReservationRepository
-
-
-@dataclasses.dataclass
-class ReservationPayload:
-    id: int | None = dataclasses.field(default=None)
+from apps.reservation.repositories import (
+    ReservationRepository,
+    ReservationCreatePayload,
+)
 
 
 def test_repository_can_create_reservation_with_valid_payload():
     # 주어진 조건
     #   - 유효한 예약 항목 생성 데이터
-    payload = ReservationPayload()
+    payload = ReservationCreatePayload()
 
     # 수행
     #   - 예약 항목 생성
@@ -28,7 +24,7 @@ def test_repository_find_all_items_without_params():
     # 주어진 조건
     #   - 예약 항목 2개
     repository = ReservationRepository()
-    item = repository.create(ReservationPayload())
+    item = repository.create(ReservationCreatePayload())
 
     # 수행
     #   - 예약 항목 목록을 가져오기

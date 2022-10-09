@@ -1,3 +1,5 @@
+import dataclasses
+
 # ReservationRepository객체
 #     def create(예약_항목_생성에_필요한_데이터):
 #         새_예약_항목 = 영속_데이터_생성(예약_항목_생성에_필요한_데이터) 영속_데이터_저장(새_예약_항목)
@@ -9,6 +11,11 @@
 
 
 items = []
+
+
+@dataclasses.dataclass
+class ReservationCreatePayload:
+    id: int | None = dataclasses.field(default=None)
 
 
 class ReservationRepository:
