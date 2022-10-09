@@ -1,4 +1,8 @@
 from apps.reservation.controllers import reservations
+from apps.reservation.repositories import (
+    ReservationRepository,
+    ReservationCreatePayload,
+)
 
 
 def test_reservations():
@@ -6,7 +10,11 @@ def test_reservations():
     #   - 로그인 한 고객
     #   - 예약 항목 2개
     user = "로그인 한 고객"
-    items = ["예약 항목 1", "예약 항목 2"]
+    repository = ReservationRepository()
+    items = [
+        repository.create(ReservationCreatePayload()),
+        repository.create(ReservationCreatePayload()),
+    ]
 
     # - 수행 (When)
     #   - 예약 가능한 세션 목록을 가져오기
@@ -14,4 +22,6 @@ def test_reservations():
 
     # - 기대하는 결과 (Then)
     #   - 예약 항목 2개를 목록으로 반환
-    assert frozenset(items) == frozenset(result)
+    result_set = frozenset(result)
+    expected_set = frozenset(items)
+    assert result_set & expected_set == expected_set

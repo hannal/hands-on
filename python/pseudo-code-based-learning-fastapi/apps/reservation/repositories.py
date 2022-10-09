@@ -17,6 +17,9 @@ items = []
 class ReservationCreatePayload:
     id: int | None = dataclasses.field(default=None)
 
+    def __hash__(self):
+        return hash(id)
+
 
 class ReservationRepository:
     _items: list

@@ -1,2 +1,6 @@
+from apps.reservation.repositories import ReservationRepository
+
+
 def reservations(user):
-    return []
+    repository = ReservationRepository()
+    return repository.findall()
