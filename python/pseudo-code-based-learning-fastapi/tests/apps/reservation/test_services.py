@@ -4,7 +4,8 @@ import pytest
 
 from apps.reservation.services import reservations
 from apps.reservation.repositories import ReservationDbRepository
-from apps.reservation.schemas import ReservationCreatePayload
+from apps.reservation.schemas import ReservationCreatePayload, ReservationListParam
+from libs.fastapi.dependencies import User
 
 
 @pytest.fixture
@@ -12,12 +13,16 @@ def repository(db_session):
     yield ReservationDbRepository(db_session)
 
 
+@pytest.fixture
+def user():
+    yield User(username="hannal", is_staff=False)
+
+
 @pytest.mark.asyncio
-async def test_reservations(repository):
+async def test_reservations(repository, user):
     # - 주어진 조건 (Given)
     #   - 로그인 한 고객
     #   - 예약 항목 2개
-    user = "로그인 한 고객"
     payloads = [
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
         ReservationCreatePayload(scheduled_date=datetime.datetime.utcnow()),
@@ -37,10 +42,11 @@ async def test_reservations(repository):
 
 
 @pytest.mark.asyncio
-async def test_reservations_cannot_get_list_with_invalid_scheduled_date(repository):
+async def test_reservations_cannot_get_list_with_invalid_scheduled_date(
+    repository, user
+):
     # - 주어진 조건 (Given)
     #   - 로그인 한 고객
-    user = "로그인 한 고객"
     scheduled_date = datetime.date(2020, 1, 1)
 
     # - 기대하는 결과 (Then)
@@ -52,11 +58,10 @@ async def test_reservations_cannot_get_list_with_invalid_scheduled_date(reposito
 
 
 @pytest.mark.asyncio
-async def test_reservations_can_get_list_with_valid_scheduled_date(repository):
+async def test_reservations_can_get_list_with_valid_scheduled_date(repository, user):
     # - 주어진 조건 (Given)
     #   - 로그인 한 고객
     #   - 예약 항목 3개
-    user = "로그인 한 고객"
     target_date = datetime.datetime.utcnow() + datetime.timedelta(days=61)
     payloads = [
         ReservationCreatePayload(scheduled_date=target_date),
