@@ -43,3 +43,21 @@ def test_cannot_get_reservation_list_with_invalid_scheduled_date(
     )
 
     assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.parametrize(
+    "headers, expected_status_code",
+    [
+        [None, status.HTTP_401_UNAUTHORIZED],
+        [{"Authorization": "Bearer hannal"}, status.HTTP_200_OK],
+    ],
+)
+def test_get_reservation_list_without_auth(
+    anonymous_client, headers, expected_status_code
+):
+    res = anonymous_client.get(
+        "/reservation/reservations",
+        params={"scheduled_date": datetime.date.today()},
+        headers=headers,
+    )
+    assert res.status_code == expected_status_code
