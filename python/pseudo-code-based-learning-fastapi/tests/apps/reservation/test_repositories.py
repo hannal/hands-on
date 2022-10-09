@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import MagicMock
 
 from apps.reservation.repositories import (
     ReservationRepository,
@@ -62,15 +63,23 @@ def test_repository_find_all_available_items():
     assert all([_o.is_available for _o in result]) is True
 
 
-def test_repository_find_all_items_by_scheduled_date():
+def test_repository_find_all_items_by_scheduled_date(monkeypatch):
     repository = ReservationRepository()
 
     # 주어진 조건
-    #   - 예약 항목 3개
-    target_date = datetime.datetime.utcnow() + datetime.timedelta(days=31)
+    #   - 예약 항목 6개
+    target_date = datetime.datetime.utcnow().replace(day=15) + datetime.timedelta(
+        days=31
+    )
     payloads = [
         ReservationCreatePayload(scheduled_date=target_date),
+        ReservationCreatePayload(
+            scheduled_date=target_date - datetime.timedelta(days=1)
+        ),
         ReservationCreatePayload(scheduled_date=target_date),
+        ReservationCreatePayload(
+            scheduled_date=target_date + datetime.timedelta(days=1)
+        ),
         # 기준 달 이후
         ReservationCreatePayload(
             scheduled_date=target_date + datetime.timedelta(days=31)
@@ -80,12 +89,19 @@ def test_repository_find_all_items_by_scheduled_date():
             scheduled_date=target_date - datetime.timedelta(days=31)
         ),
     ]
-    items = [repository.create(_o) for _o in payloads]
-    items[0].is_available = False
+    unavailable_item, yesterday_item, *items = [
+        repository.create(_o) for _o in payloads
+    ]
+    unavailable_item.is_available = False
 
     # 수행
     #   - 지정한 달의 예약 항목 목록을 가져오기
-    result = repository.findall(scheduled_date=target_date)
+    with monkeypatch.context() as _m:
+        _mock_datetime = MagicMock(spec=datetime.datetime)
+        _mock_datetime.utcnow.return_value = target_date
+        _m.setattr(datetime, "datetime", _mock_datetime)
+
+        result = frozenset(repository.findall(scheduled_date=target_date.date()))
 
     # 기대하는 결과
     #   - 지정한 달의 예약 가능 항목만 목록으로 반환
@@ -97,3 +113,5 @@ def test_repository_find_all_items_by_scheduled_date():
             for _o in result
         ]
     )
+    #   - 지정한 달이 이번 달인 경우 오늘부터 말일까지 반환
+    assert yesterday_item not in result

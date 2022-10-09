@@ -10,7 +10,7 @@ import pydantic
 #     return 새_예약_항목
 #
 #     def findall(지정한_일자):
-#         return list(저장된_영속 데이터들 중에서 지정한일자에 속한 달)
+#         return list(저장된_영속 데이터들 중에서 지정한일자에 속한 달 또는 이번 달에서 오늘부터 말일까지)
 
 
 items = []
@@ -48,13 +48,28 @@ class ReservationRepository:
         self, *, scheduled_date: t.Optional[datetime.date] = None
     ) -> list[Reservation]:
         filtered = filter(lambda _o: _o.is_available, self._items)
+
         if isinstance(scheduled_date, datetime.date):
-            filtered = filter(
-                lambda _o: _o.scheduled_date.year == scheduled_date.year,
-                filtered,
-            )
-            filtered = filter(
-                lambda _o: _o.scheduled_date.month == scheduled_date.month,
-                filtered,
-            )
+            filtered = self._filter_by_scheduled_date(scheduled_date, filtered)
         return list(filtered)
+
+    @staticmethod
+    def _filter_by_scheduled_date(
+        scheduled_date: datetime.date, objs: filter | list[Reservation]
+    ) -> filter:
+        filtered = filter(
+            lambda _o: _o.scheduled_date.year == scheduled_date.year,
+            objs,
+        )
+        filtered = filter(
+            lambda _o: _o.scheduled_date.month == scheduled_date.month,
+            filtered,
+        )
+
+        today = datetime.datetime.utcnow().date()
+        if scheduled_date == today:
+            return filter(
+                lambda _o: _o.scheduled_date.date() >= today,
+                filtered,
+            )
+        return filtered
