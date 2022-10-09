@@ -6,8 +6,8 @@ authors = [
     "Hannal <kay@hannal.net>",
 ]
 packages = [
-    { include='fastapi_authz', from='.' },
     { include='apps', from='.' },
+    { include='libs', from='.' },
 ]
 
 [tool.poetry.dependencies]
