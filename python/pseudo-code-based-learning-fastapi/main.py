@@ -5,3 +5,4 @@ from apps.reservation.controllers import router as reservation_router
 app = FastAPI()
 
 app.include_router(reservation_router)
+# app.include_router(reservation_router, prefix="/reservation")

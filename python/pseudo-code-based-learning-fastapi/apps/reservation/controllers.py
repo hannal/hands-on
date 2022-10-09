@@ -4,10 +4,10 @@ from . import services
 from .repositories import ReservationRepository, Reservation
 
 
-router = APIRouter()
+router = APIRouter(prefix="/reservation")
 
 
-@router.get("/reservation/reservations", response_model=list[Reservation])
+@router.get("/reservations", response_model=list[Reservation])
 def reservations():
     repository = ReservationRepository()
     return services.reservations(None, repository)
