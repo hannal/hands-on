@@ -9,7 +9,7 @@ class Reservation(BaseModel):
     is_available = Column(Boolean, nullable=False, default=True)
 
     def __hash__(self):
-        return hash(id)
+        return hash(self.id)
 
     def __repr__(self):
         return f"Reservation(id={self.id}, scheduled_date={self.scheduled_date}, is_available={self.is_available})"
