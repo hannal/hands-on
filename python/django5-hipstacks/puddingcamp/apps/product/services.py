@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Sequence
 
-from django.db import transaction
+from libs import transaction
 
 from .models import Price, PriceRepository, Product, ProductRepository
 
@@ -18,7 +18,7 @@ class ProductService:
         self.price_repository = price_repository
 
     async def create_product_with_price(self, name: str, price: int | float) -> Product:
-        with transaction.atomic():
+        async with transaction.aatomic():
             product = await self.repository.acreate(name=name)
 
             price = Decimal(price)
@@ -26,4 +26,5 @@ class ProductService:
             return product
 
     async def get_products(self) -> Sequence[Product]:
-        return [o async for o in self.repository.all()]
+        qs = self.repository
+        return [o async for o in qs.all()]

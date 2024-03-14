@@ -8,15 +8,20 @@ from apps.product.services import ProductService
 
 class TestProductView(TestCase):
     client_class = AsyncClient
-    service = ProductService()
 
     def setUp(self) -> None:
-        async_to_sync(self.service.create_product_with_price)("product 1", 299_792.458)
-        async_to_sync(self.service.create_product_with_price)("product 2", 980_665)
+        self.service = ProductService()
+        self.products = [
+            async_to_sync(self.service.create_product_with_price)("product 1", 299_792.458),
+            async_to_sync(self.service.create_product_with_price)("product 2", 980_665),
+        ]
 
     async def test_product_list(self) -> None:
         url = reverse("product:product-list")
         res = await self.client.get(url)
         assert res.status_code == 200
 
-        self.assertContains(res, '<div id="product-price-"')
+        self.assertContains(res, "가격 :", html=False)
+        for product in self.products:
+            async for price in product.price_set.all():
+                self.assertContains(res, f"가격 : {price.price}", html=True)
