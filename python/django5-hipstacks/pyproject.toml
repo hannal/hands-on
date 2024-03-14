@@ -8,9 +8,12 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 django = "^5.0.3"
+uvicorn = "^0.28.0"
+django-extensions = "^3.2.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
+ruff = "^0.3.2"
 
 [build-system]
 requires = ["poetry-core"]
