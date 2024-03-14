@@ -26,5 +26,5 @@ class ProductService:
             return product
 
     async def get_products(self) -> Sequence[Product]:
-        qs = self.repository
+        qs = self.repository.prefetch_related("price_set")
         return [o async for o in qs.all()]

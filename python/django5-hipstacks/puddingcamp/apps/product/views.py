@@ -1,4 +1,3 @@
-from asgiref.sync import sync_to_async
 from django.http import HttpRequest
 from django.shortcuts import render
 
@@ -13,4 +12,4 @@ async def product_list(request: HttpRequest) -> None:
         "products": products,
     }
 
-    return await sync_to_async(render)(request, "product_list.html", ctx)
+    return render(request, "product_list.html", ctx)
