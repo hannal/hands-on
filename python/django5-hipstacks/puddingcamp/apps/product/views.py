@@ -1,3 +1,6 @@
+from django.http import HttpRequest
 from django.shortcuts import render
 
-# Create your views here.
+
+async def product_list(request: HttpRequest) -> None:
+    return render(request, "product_list.html", {})
