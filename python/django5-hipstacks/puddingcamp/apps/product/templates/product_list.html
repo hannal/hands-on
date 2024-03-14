@@ -1,0 +1,10 @@
+
+{% for item in products %}
+  <p>{{ item.name }}</p>
+
+  <div>
+    {% for price in item.price_set.all %}
+      {% include "product_price.html" %}
+    {% endfor %}
+  </div>
+{% endfor %}
