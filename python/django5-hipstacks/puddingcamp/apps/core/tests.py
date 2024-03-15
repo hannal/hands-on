@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 
 from asgiref.sync import async_to_sync
 from django.contrib.auth.models import User
@@ -24,7 +25,7 @@ class TestProductView(TestCase):
     async def test_product_list(self) -> None:
         url = reverse("product:product-list")
         res = await self.client.get(url)
-        assert res.status_code == 200
+        assert res.status_code == HTTPStatus.OK
 
         # self.assertContains(res, "가격 :", html=False)
         # for product in self.products:
@@ -37,7 +38,7 @@ class TestProductView(TestCase):
             kwargs={"product_id": self.products[0].id},
         )
         res = await self.client.get(url)
-        assert res.status_code == 400
+        assert res.status_code == HTTPStatus.BAD_REQUEST
 
     async def test_get_product_price_htmx(self) -> None:
         product = self.products[0]
@@ -57,7 +58,7 @@ class TestProductView(TestCase):
             assert "price" in data
             assert data["productName"] == product.name
             assert "type" in data
-        assert res.status_code == 200
+        assert res.status_code == HTTPStatus.OK
 
     async def test_request_new_order(self) -> None:
         product = self.products[0]
@@ -74,7 +75,7 @@ class TestProductView(TestCase):
             headers=headers,
         )
 
-        assert res.status_code == 200
+        assert res.status_code == HTTPStatus.OK
         data = OrderSchema.model_validate(res.json())
         assert isinstance(data.order_id, int)
         assert data.product_id == payload["product_id"]
@@ -84,11 +85,11 @@ class TestProductView(TestCase):
         product = self.products[0]
         url = reverse("ninja:set-favorite-api", kwargs={"product_id": product.id})
         res = await self.client.post(url)
-        assert res.status_code == 403
+        assert res.status_code == HTTPStatus.FORBIDDEN
 
     async def test_set_favorite(self) -> None:
         product = self.products[0]
         url = reverse("ninja:set-favorite-api", kwargs={"product_id": product.id})
         await self.client.aforce_login(self.user)
         res = await self.client.post(url)
-        assert res.status_code == 200
+        assert res.status_code == HTTPStatus.OK
