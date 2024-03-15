@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_htmx",
     "django_jinja",
+    "ninja_extra",
     # Local apps
     "apps.core",
     "apps.product",
@@ -143,3 +144,9 @@ STATICFILES_DIRS = [
 ]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+NINJA_EXTRA = {
+    "INJECTOR_MODULES": [
+        "apps.product.container.ProductContainer",
+    ],
+}
