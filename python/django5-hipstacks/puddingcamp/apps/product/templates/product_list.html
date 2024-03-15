@@ -2,9 +2,9 @@
 {% for item in products %}
   <p>{{ item.name }}</p>
 
-  <div>
-    {% for price in item.price_set.all %}
-      {% include "product_price.html" %}
-    {% endfor %}
-  </div>
+  <div
+      hx-get="{% url 'product:partial-super-complex-pricing-api' item.pk %}"
+      hx-trigger="load delay:1s"
+      hx-swap="outerHTML"
+  ></div>
 {% endfor %}

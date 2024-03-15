@@ -29,3 +29,9 @@ class ProductService:
         # qs = self.repository.prefetch_related("price_set")
         qs = self.repository
         return [o async for o in qs.all()]
+
+    async def get_optimized_price(self, product_id: int | str) -> Price:
+        qs = self.price_repository
+        qs = qs.select_related("product")
+        qs = qs.filter(product_id=product_id)
+        return await qs.afirst()

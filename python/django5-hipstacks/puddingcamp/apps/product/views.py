@@ -1,8 +1,24 @@
 from asgiref.sync import sync_to_async
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseBadRequest
 from django.shortcuts import render
 
 from .services import ProductService
+
+
+async def partial_super_complex_pricing_api(
+    request: HttpRequest,
+    product_id: str,
+) -> None:
+    if not request.htmx:
+        return HttpResponseBadRequest()
+
+    service = ProductService()
+    price = await service.get_optimized_price(product_id)
+
+    ctx = {
+        "price": price,
+    }
+    return await sync_to_async(render)(request, "product_price.html", ctx)
 
 
 async def product_list(request: HttpRequest) -> None:
@@ -12,4 +28,15 @@ async def product_list(request: HttpRequest) -> None:
     ctx = {
         "products": products,
     }
-    return await sync_to_async(render, thread_sensitive=True)(request, "product_list.html", ctx)
+    return await sync_to_async(render)(request, "product_list.html", ctx)
+
+
+# @sync_to_async
+# def product_list(request: HttpRequest) -> None:
+#     service = ProductService()
+#     products = async_to_sync(service.get_products)()
+
+#     ctx = {
+#         "products": products,
+#     }
+#     return render(request, "product_list.html", ctx)

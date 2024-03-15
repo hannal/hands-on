@@ -21,7 +21,26 @@ class TestProductView(TestCase):
         res = await self.client.get(url)
         assert res.status_code == 200
 
-        self.assertContains(res, "가격 :", html=False)
-        for product in self.products:
-            async for price in product.price_set.all():
-                self.assertContains(res, f"가격 : {price.price}", html=True)
+        # self.assertContains(res, "가격 :", html=False)
+        # for product in self.products:
+        #     async for price in product.price_set.all():
+        #         self.assertContains(res, f"가격 : {price.price}", html=True)
+
+    async def test_get_product_price_without_htmx(self) -> None:
+        url = reverse(
+            "product:partial-super-complex-pricing-api",
+            kwargs={"product_id": self.products[0].id},
+        )
+        res = await self.client.get(url)
+        assert res.status_code == 400
+
+    async def test_get_product_price_htmx(self) -> None:
+        url = reverse(
+            "product:partial-super-complex-pricing-api",
+            kwargs={"product_id": self.products[0].id},
+        )
+        headers = {
+            "HX-REQUEST": "true",
+        }
+        res = await self.client.get(url, headers=headers)
+        assert res.status_code == 200
