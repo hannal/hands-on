@@ -1,6 +1,7 @@
 import json
 
 from asgiref.sync import async_to_sync
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.client import AsyncClient
 from django.urls import reverse
@@ -18,6 +19,7 @@ class TestProductView(TestCase):
             async_to_sync(self.service.create_product_with_price)("product 1", 299_792.458),
             async_to_sync(self.service.create_product_with_price)("product 2", 980_665),
         ]
+        self.user = User.objects.create_user("test", "")
 
     async def test_product_list(self) -> None:
         url = reverse("product:product-list")
@@ -77,3 +79,16 @@ class TestProductView(TestCase):
         assert isinstance(data.order_id, int)
         assert data.product_id == payload["product_id"]
         assert data.quantity == payload["quantity"]
+
+    async def test_anonymous_cannot_set_favorite(self) -> None:
+        product = self.products[0]
+        url = reverse("ninja:set-favorite-api", kwargs={"product_id": product.id})
+        res = await self.client.post(url)
+        assert res.status_code == 403
+
+    async def test_set_favorite(self) -> None:
+        product = self.products[0]
+        url = reverse("ninja:set-favorite-api", kwargs={"product_id": product.id})
+        await self.client.aforce_login(self.user)
+        res = await self.client.post(url)
+        assert res.status_code == 200

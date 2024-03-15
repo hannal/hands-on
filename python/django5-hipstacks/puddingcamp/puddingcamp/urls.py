@@ -1,10 +1,15 @@
+from apps.product.views import FavoriteController
 from django.contrib import admin
 from django.contrib.staticfiles.urls import urlpatterns as staticfiles_urlpatterns
 from django.urls import include, path
-from ninja import NinjaAPI
+from ninja_extra import NinjaExtraAPI
 
-api = NinjaAPI()
+api = NinjaExtraAPI()
+
 api.add_router("products", "apps.product.urls.router")
+api.register_controllers(
+    FavoriteController,
+)
 
 urlpatterns = [
     path("products/", include("apps.product.urls")),
