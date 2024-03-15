@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from django_jinja.builtins import DEFAULT_EXTENSIONS
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -19,6 +21,7 @@ INSTALLED_APPS = [
     # 3rd parties
     "django_extensions",
     "django_htmx",
+    "django_jinja",
     # Local apps
     "apps.core",
     "apps.product",
@@ -38,6 +41,54 @@ MIDDLEWARE = [
 ROOT_URLCONF = "puddingcamp.urls"
 
 TEMPLATES = [
+    {
+        "BACKEND": "django_jinja.jinja2.Jinja2",
+        "DIRS": [
+            BASE_DIR / "global_templates",
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "extensions": [
+                *DEFAULT_EXTENSIONS,
+            ],
+            "context_processors": [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
+            ],
+            "match_extension": ".jinja2",
+            "match_regex": None,
+            "app_dirname": "templates",
+            "newstyle_gettext": True,
+            # custom context
+            "tests": {},
+            "filters": {
+                "naturalday": "django.contrib.humanize.templatetags.humanize.naturalday",
+                "naturaltime": "django.contrib.humanize.templatetags.humanize.naturaltime",
+                "localize": "django.utils.formats.localize",
+            },
+            "constants": {},
+            "globals": {
+                "django_htmx_script": "django_htmx.jinja.django_htmx_script",
+            },
+            "policies": {
+                "ext.i18n.trimmed": True,
+            },
+            "bytecode_cache": {
+                "name": "default",
+                "backend": "django_jinja.cache.BytecodeCache",
+                "enabled": False,
+            },
+            "autoescape": True,
+            "auto_reload": True,
+            "translation_engine": "django.utils.translation",
+        },
+    },
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
