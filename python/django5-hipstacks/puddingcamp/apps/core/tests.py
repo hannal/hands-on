@@ -1,3 +1,5 @@
+import json
+
 from asgiref.sync import async_to_sync
 from django.test import TestCase
 from django.test.client import AsyncClient
@@ -35,12 +37,21 @@ class TestProductView(TestCase):
         assert res.status_code == 400
 
     async def test_get_product_price_htmx(self) -> None:
+        product = self.products[0]
         url = reverse(
             "product:partial-super-complex-pricing-api",
-            kwargs={"product_id": self.products[0].id},
+            kwargs={"product_id": product.id},
         )
         headers = {
             "HX-REQUEST": "true",
         }
         res = await self.client.get(url, headers=headers)
+        if htmx_data := res.headers.get("HX-Trigger"):
+            data = json.loads(htmx_data)
+            assert "optimizedPrice" in data
+            data = data["optimizedPrice"]
+
+            assert "price" in data
+            assert data["productName"] == product.name
+            assert "type" in data
         assert res.status_code == 200

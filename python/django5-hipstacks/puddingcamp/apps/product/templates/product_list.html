@@ -8,3 +8,12 @@
       hx-swap="outerHTML"
   ></div>
 {% endfor %}
+
+<script>
+document.body.addEventListener('optimizedPrice', function(e) {
+  const { price, productName, type } = e.detail;
+  if (type === 'pyweb-symposeum-2024-optimized-price') {
+    alert(`파이웹 심포지움에서 오셨군요! ${productName}의 특별 가격, ${price}원을 제안드립니다!`);
+  }
+});
+</script>
