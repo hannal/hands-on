@@ -10,10 +10,107 @@ python = "^3.11"
 django = "^5.0.3"
 uvicorn = "^0.28.0"
 django-extensions = "^3.2.3"
+django-htmx = "^1.17.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
 ruff = "^0.3.2"
+
+[tool.ruff]
+# https://beta.ruff.rs/docs/rules/
+select = [
+  "E",
+  "W",
+  "F",
+  "I",
+  "W",
+  "N",
+  "D",
+  "ANN",
+  "ASYNC102",
+  "S",
+  "BLE",
+  "B",
+  "A",
+  "COM",
+  "DTZ",
+  "FA",
+  "ISC",
+  "INP",
+  "PIE",
+  "PT",
+  "Q",
+  "INT",
+  "ARG",
+  "PTH",
+  "TD",
+  "FIX",
+  "PL",
+  "TRY",
+  "RUF",
+]
+ignore = [
+  "A003",
+  "B008",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  "D203",
+  "D204",
+  "D211",
+  "D213",
+  "E731",
+  "ANN002",
+  "ANN003",
+  "ANN101",
+  "ANN102",
+  "ANN202",
+  "ANN401",
+  "B003",
+  "ARG001",
+  "ARG002",
+  "TRY002",
+  "TRY003",
+  "PLR0913",
+  "PLC0414",
+  "PT004",
+  "PT022",
+  "PTH118",
+  "PTH122",
+  "PLW0603",
+  "S101",
+  "DTZ003",
+  "SIM",
+  "SIM114",
+]
+exclude = [
+  ".git",
+  ".cache",
+  ".idea",
+  ".egg",
+  "__pycache__",
+  ".venv",
+  "dist",
+  "build",
+  "docs",
+  "*.pyi",
+  "fixture_builders.py",
+  "conftest_*.py",
+  "db_migrations",
+]
+per-file-ignores = {}
+line-length = 100
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+target-version = "py311"
+task-tags = ["TODO", "FIXME"]
+
+[tool.ruff.mccabe]
+max-complexity = 10
 
 [build-system]
 requires = ["poetry-core"]
