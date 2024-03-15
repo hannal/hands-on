@@ -1,4 +1,6 @@
-from ninja import Field, Schema
+from ninja import Field, ModelSchema, Schema
+
+from .models import Product
 
 
 class OrderCreatePayloadSchema(Schema):
@@ -10,3 +12,9 @@ class OrderSchema(Schema):
     order_id: int
     product_id: int
     quantity: int
+
+
+class ProductSchema(ModelSchema):
+    class Meta:
+        model = Product
+        fields = ("name",)

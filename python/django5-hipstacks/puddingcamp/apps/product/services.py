@@ -1,6 +1,8 @@
 from decimal import Decimal
 from typing import Sequence
 
+from asgiref.sync import sync_to_async
+from django.shortcuts import get_object_or_404
 from libs import transaction
 
 from .models import Price, PriceRepository, Product, ProductRepository
@@ -35,3 +37,7 @@ class ProductService:
         qs = qs.select_related("product")
         qs = qs.filter(product_id=product_id)
         return await qs.afirst()
+
+    async def get_product_by_id(self, product_id: str | int) -> Product:
+        # return get_object_or_404(self.repository, pk=product_id)
+        return await sync_to_async(get_object_or_404)(self.repository, pk=product_id)
