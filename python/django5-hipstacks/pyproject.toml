@@ -13,6 +13,7 @@ django-extensions = "^3.2.3"
 django-htmx = "^1.17.3"
 django-jinja = "^2.11.0"
 django-ninja = "^1.1.0"
+django-ninja-extra = "^0.20.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
