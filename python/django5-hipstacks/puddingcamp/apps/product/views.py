@@ -38,7 +38,7 @@ async def product_list(request: HttpRequest) -> None:
     ctx = {
         "products": products,
     }
-    return await sync_to_async(render)(request, "product_list.html", ctx)
+    return await sync_to_async(render)(request, "product_list.jinja2", ctx)
 
 
 # @sync_to_async
