@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.client import AsyncClient
 from django.urls import reverse
 
+from apps.product.schema import OrderSchema
 from apps.product.services import ProductService
 
 
@@ -55,3 +56,24 @@ class TestProductView(TestCase):
             assert data["productName"] == product.name
             assert "type" in data
         assert res.status_code == 200
+
+    async def test_request_new_order(self) -> None:
+        product = self.products[0]
+        url = reverse("ninja:request-new-order")
+        headers = {"HX-REQUEST": "true"}
+        payload = {
+            "product_id": product.id,
+            "quantity": 1,
+        }
+        res = await self.client.post(
+            url,
+            data=payload,
+            content_type="application/json",
+            headers=headers,
+        )
+
+        assert res.status_code == 200
+        data = OrderSchema.model_validate(res.json())
+        assert isinstance(data.order_id, int)
+        assert data.product_id == payload["product_id"]
+        assert data.quantity == payload["quantity"]

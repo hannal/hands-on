@@ -3,8 +3,24 @@ import json
 from asgiref.sync import sync_to_async
 from django.http import HttpRequest, HttpResponseBadRequest
 from django.shortcuts import render
+from ninja import Router
 
+from .schema import OrderCreatePayloadSchema, OrderSchema
 from .services import ProductService
+
+router = Router()
+
+
+@router.post("/new-order", url_name="request-new-order", response=OrderSchema)
+async def request_new_order(
+    request: HttpRequest,
+    payload: OrderCreatePayloadSchema,
+) -> OrderSchema:
+    return OrderSchema(
+        order_id=1,
+        product_id=payload.product_id,
+        quantity=payload.quantity,
+    )
 
 
 async def partial_super_complex_pricing_api(
