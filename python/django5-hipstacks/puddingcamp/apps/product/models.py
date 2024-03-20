@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.functions import StrIndex, Substr, Trim
 
 
 class ProductRepository(models.QuerySet):
@@ -7,6 +8,18 @@ class ProductRepository(models.QuerySet):
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
+    excerpt = models.GeneratedField(
+        expression=Trim(
+            Substr(
+                "description",
+                StrIndex("description", models.Value("#")) + 1,
+                StrIndex("description", models.Value("\n")),
+            )
+        ),
+        output_field=models.CharField(max_length=250),
+        db_persist=False,
+    )
+
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,4 +44,4 @@ class Price(models.Model):
     objects = PriceRepository.as_manager()
 
     def __str__(self):
-        return f'{self.product_id} - {self.price}'
+        return f"{self.product_id} - {self.price}"
