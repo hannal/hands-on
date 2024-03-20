@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_htmx",
     "django_jinja",
+    "django_jinja.contrib._humanize",
     "ninja_extra",
     # Local apps
     "apps.core",
