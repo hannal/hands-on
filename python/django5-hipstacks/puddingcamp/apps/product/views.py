@@ -72,8 +72,9 @@ async def partial_super_complex_pricing_api(
 
     ctx = {
         "price": price,
+        "is_partial": bool(request.htmx),
     }
-    res = await sync_to_async(render)(request, "product_price.html", ctx)
+    res = await sync_to_async(render)(request, "product_price.jinja2", ctx)
     price_info = {
         "price": str(price.price),
         "productName": price.product.name,

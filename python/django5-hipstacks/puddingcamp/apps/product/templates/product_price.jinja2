@@ -1,0 +1,7 @@
+{% extends 'layout.jinja2' %}
+
+{% block partial_content %}
+    <div id="product-price-{{ price.pk }}">
+        가격 : {{ price.price }}
+    </div>
+{% endblock partial_content %}
