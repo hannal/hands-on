@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% if is_partial %}
+    {% block partial_content %}
+{% else %}
+    {% block content %}
+{% endif %}
+<div id="product-price-{{ price.pk }}">
+    가격 : {{ price.price }}
+</div>
+{% if is_partial %}
+    {% endblock partial_content %}
+{% else %}
+    {% endblock content %}
+{% endif %}

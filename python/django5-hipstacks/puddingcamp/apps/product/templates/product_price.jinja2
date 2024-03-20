@@ -1,0 +1,8 @@
+{% extends 'layout.jinja2' %}
+{% import 'currency.jinja2' as currency %}
+
+{% block partial_content %}
+    <div id="product-price-{{ price.pk }}">
+        가격 : {{ currency.render(price.price) }}
+    </div>
+{% endblock partial_content %}

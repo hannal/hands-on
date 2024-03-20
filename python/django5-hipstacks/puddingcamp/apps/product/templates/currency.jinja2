@@ -1,0 +1,3 @@
+{% macro render(price) %}
+    <span>{{ price.to_integral_value()|intcomma }}원</span>
+{% endmacro %}
